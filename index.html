@@ -59,15 +59,22 @@
 
 <script>
   const noms = [
-    "Berthelin Antoine", "Rouessay Nino", "Daniel Gabin", "Le Flochemoën Sofiane",
-    "Delaunay Timéo", "Rouessay Jules", "Trachida Shevan", "Renault Léo",
-    "Mr dubrez", "Mme cadot", "Mme radchine", "Mr grisel", "Mr Aubry",
-    "Mme Généraux", "Mme Maheut", "Mme poidevin",
-    "Surveillant 1", "Surveillant 2", "Surveillant 3", "Surveillant 4",
-    "Mathieu Lorenzo", "Sanlaville Lucas"
+    "AntoineBerthelin", "NinoRouessay", "GabinDaniel", "SofianeLeFlochemoën",
+    "TiméoDelaunay", "JulesRouessay", "ShevanTrachida", "LéoRenault",
+    "Mrdubrez", "Mmecadot", "Mmeradchine", "Mrgrisel", "MrAubry",
+    "MmeGénéraux", "MmeMaheut", "Mmepoidevin",
+    "Surveillant1", "Surveillant2", "Surveillant3", "Surveillant4",
+    "LorenzoMathieu", "LucasSanlaville"
   ];
 
-  const invites = noms.map((nom, id) => ({ id, nom, status: "absent" }));
+  let invites = noms.map((nom, id) => {
+    const saved = localStorage.getItem("invite_" + id);
+    return {
+      id,
+      nom,
+      status: saved || "absent"
+    };
+  });
 
   const listEl = document.getElementById("inviteList");
   const searchEl = document.getElementById("search");
@@ -95,16 +102,22 @@
       element.classList.remove("arrive");
       element.classList.add("deja");
     }
+    localStorage.setItem("invite_" + id, invite.status);
   }
 
   function resetPresence() {
-    invites.forEach(i => i.status = "absent");
+    invites.forEach(i => {
+      i.status = "absent";
+      localStorage.removeItem("invite_" + i.id);
+    });
     afficherInvites(searchEl.value);
   }
 
   searchEl.addEventListener("input", () => afficherInvites(searchEl.value));
   afficherInvites();
 </script>
+</body>
+</html>
 
 </body>
 </html>
