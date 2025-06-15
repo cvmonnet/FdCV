@@ -26,9 +26,6 @@
       padding: 10px;
       border: 1px solid #ccc;
       margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       cursor: pointer;
       transition: background-color 0.3s;
     }
@@ -41,20 +38,6 @@
     .deja {
       background-color: #ffc107;
       color: black;
-    }
-
-    .prenom {
-      font-weight: bold;
-      color: #888;
-    }
-
-    .historique {
-      margin-top: 30px;
-    }
-
-    .historique ul {
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
     }
 
     button {
@@ -74,11 +57,6 @@
 
 <button onclick="resetPresence()">🔁 Réinitialiser les présences</button>
 
-<div class="historique">
-  <h2>Historique des arrivées</h2>
-  <ul id="historiqueList"></ul>
-</div>
-
 <script>
   const noms = [
     "Berthelin Antoine", "Rouessay Nino", "Daniel Gabin", "Le Flochemoën Sofiane",
@@ -89,22 +67,19 @@
     "Mathieu Lorenzo", "Sanlaville Lucas"
   ];
 
-  const invites = noms.map((nom, id) => ({ id, nom, status: "absent", heure: null }));
+  const invites = noms.map((nom, id) => ({ id, nom, status: "absent" }));
 
   const listEl = document.getElementById("inviteList");
   const searchEl = document.getElementById("search");
-  const historiqueEl = document.getElementById("historiqueList");
 
   function afficherInvites(filtre = "") {
     listEl.innerHTML = "";
-    const filtrés = invites.filter(i => i.nom.toLowerCase().includes(filtre.toLowerCase()));
-    filtrés.forEach(invite => {
+    const filtres = invites.filter(i => i.nom.toLowerCase().includes(filtre.toLowerCase()));
+    filtres.forEach(invite => {
       const li = document.createElement("li");
-      const [nom, prenom] = invite.nom.split(" ");
-      li.innerHTML = `<span>${nom}</span> <span class="prenom">${prenom || ""}</span>`;
+      li.textContent = invite.nom;
       if (invite.status === "arrive") li.classList.add("arrive");
       else if (invite.status === "deja") li.classList.add("deja");
-
       li.onclick = () => marquerPresence(invite.id, li);
       listEl.appendChild(li);
     });
@@ -112,41 +87,22 @@
 
   function marquerPresence(id, element) {
     const invite = invites.find(i => i.id === id);
-    const now = new Date().toLocaleTimeString();
-
     if (invite.status === "absent") {
       invite.status = "arrive";
-      invite.heure = now;
-      ajouterHistorique(invite.nom, now);
       element.classList.add("arrive");
-      setTimeout(() => element.classList.remove("arrive"), 2000);
     } else if (invite.status === "arrive") {
       invite.status = "deja";
       element.classList.remove("arrive");
       element.classList.add("deja");
-      setTimeout(() => element.classList.remove("deja"), 2000);
     }
   }
 
-  function ajouterHistorique(nom, heure) {
-    const li = document.createElement("li");
-    li.textContent = `${nom} - arrivé à ${heure}`;
-    historiqueEl.prepend(li);
-  }
-
   function resetPresence() {
-    invites.forEach(i => {
-      i.status = "absent";
-      i.heure = null;
-    });
-    historiqueEl.innerHTML = "";
+    invites.forEach(i => i.status = "absent");
     afficherInvites(searchEl.value);
   }
 
-  searchEl.addEventListener("input", () => {
-    afficherInvites(searchEl.value);
-  });
-
+  searchEl.addEventListener("input", () => afficherInvites(searchEl.value));
   afficherInvites();
 </script>
 
