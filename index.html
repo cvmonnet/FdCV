@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion des Invités</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 20px;
+      font-size: 1em;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .arrive {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .deja {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .prenom {
+      font-weight: bold;
+      color: #888;
+    }
+
+    .historique {
+      margin-top: 30px;
+    }
+
+    .historique ul {
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Liste des invités</h1>
+
+<input type="text" id="search" placeholder="Rechercher un nom ou prénom...">
+
+<ul id="inviteList"></ul>
+
+<button onclick="resetPresence()">🔁 Réinitialiser les présences</button>
+
+<div class="historique">
+  <h2>Historique des arrivées</h2>
+  <ul id="historiqueList"></ul>
+</div>
+
+<script>
+  const noms = [
+    "Berthelin Antoine", "Rouessay Nino", "Daniel Gabin", "Le Flochemoën Sofiane",
+    "Delaunay Timéo", "Rouessay Jules", "Trachida Shevan", "Renault Léo",
+    "Mr dubrez", "Mme cadot", "Mme radchine", "Mr grisel", "Mr Aubry",
+    "Mme Généraux", "Mme Maheut", "Mme poidevin",
+    "Surveillant 1", "Surveillant 2", "Surveillant 3", "Surveillant 4",
+    "Mathieu Lorenzo", "Sanlaville Lucas"
+  ];
+
+  const invites = noms.map((nom, id) => ({ id, nom, status: "absent", heure: null }));
+
+  const listEl = document.getElementById("inviteList");
+  const searchEl = document.getElementById("search");
+  const historiqueEl = document.getElementById("historiqueList");
+
+  function afficherInvites(filtre = "") {
+    listEl.innerHTML = "";
+    const filtrés = invites.filter(i => i.nom.toLowerCase().includes(filtre.toLowerCase()));
+    filtrés.forEach(invite => {
+      const li = document.createElement("li");
+      const [nom, prenom] = invite.nom.split(" ");
+      li.innerHTML = `<span>${nom}</span> <span class="prenom">${prenom || ""}</span>`;
+      if (invite.status === "arrive") li.classList.add("arrive");
+      else if (invite.status === "deja") li.classList.add("deja");
+
+      li.onclick = () => marquerPresence(invite.id, li);
+      listEl.appendChild(li);
+    });
+  }
+
+  function marquerPresence(id, element) {
+    const invite = invites.find(i => i.id === id);
+    const now = new Date().toLocaleTimeString();
+
+    if (invite.status === "absent") {
+      invite.status = "arrive";
+      invite.heure = now;
+      ajouterHistorique(invite.nom, now);
+      element.classList.add("arrive");
+      setTimeout(() => element.classList.remove("arrive"), 2000);
+    } else if (invite.status === "arrive") {
+      invite.status = "deja";
+      element.classList.remove("arrive");
+      element.classList.add("deja");
+      setTimeout(() => element.classList.remove("deja"), 2000);
+    }
+  }
+
+  function ajouterHistorique(nom, heure) {
+    const li = document.createElement("li");
+    li.textContent = `${nom} - arrivé à ${heure}`;
+    historiqueEl.prepend(li);
+  }
+
+  function resetPresence() {
+    invites.forEach(i => {
+      i.status = "absent";
+      i.heure = null;
+    });
+    historiqueEl.innerHTML = "";
+    afficherInvites(searchEl.value);
+  }
+
+  searchEl.addEventListener("input", () => {
+    afficherInvites(searchEl.value);
+  });
+
+  afficherInvites();
+</script>
+
+</body>
+</html>
